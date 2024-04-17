@@ -5,7 +5,12 @@ import jakarta.persistence.*
 import java.util.UUID
 
 @Entity
-@Table(name = "user_team_mapping")
+@Table(
+    name = "user_team_mapping",
+    uniqueConstraints = [
+        UniqueConstraint(columnNames = ["user_id", "team_id"])
+    ]
+)
 class UserTeamMappingEntity(
 
     @ManyToOne
@@ -40,10 +45,14 @@ class UserTeamMappingEntity(
 
         fun toDto(): UserTeamMappingResponse{
             return UserTeamMappingResponse(
-                userId = user,
+                userId = user.id!!,
+                userName = user.name,
+                userIconUrl = user.iconUrl,
                 teamId = team.id!!,
+                teamName = team.name!!,
                 isLeader = isLeader,
-                invitationAccepted = invitationAccepted
+                invitationAccepted = invitationAccepted,
+                invitationDenied = invitationDenied
             )
         }
 
@@ -56,8 +65,12 @@ data class UserTeamMappingDto(
 )
 
 data class UserTeamMappingResponse(
-    val userId: UserEntity,
+    val userId: UUID,
+    val userName : String,
+    val userIconUrl :String,
     val teamId: UUID,
+    val teamName : String,
     val isLeader: Boolean,
-    val invitationAccepted: Boolean
+    val invitationAccepted: Boolean,
+    val invitationDenied: Boolean = false,
 )

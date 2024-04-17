@@ -27,7 +27,7 @@ class TeamController(
     fun createTeam(
         @RequestHeader("Authorization") token: String,
         @Valid @RequestBody teamReq: CreateTeamRequestDto,
-    ) {
+    ): ResponseEntity<Any> {
         val team = teamRepository.save(
             TeamEntity(
                 name = teamReq.name!!,
@@ -36,13 +36,20 @@ class TeamController(
         )
         val userId = getUserIdFromToken(token,jwtProvider)
         val user = userRepository.findById(userId).orElseThrow { throw Exception("User not found") }
-        userTeamMappingRepository.save(
+        val res = userTeamMappingRepository.save(
             UserTeamMappingEntity(
                 user = user,
                 team = team,
                 isLeader = true,
                 invitationAccepted = true
             )
+        )
+        return ResponseEntity.ok().body(
+            object{
+                val success = true
+                val message = "created team"
+                val teamId = res.team.id
+            }
         )
     }
 

@@ -130,7 +130,11 @@ class UserController(
         @RequestBody tagIds: List<String>
     ): ResponseEntity<ApiResponse> {
         val tags = tagIds.mapNotNull { tagRepository.findById(it.toUuid()).orElse(null) }
-        val users = userRepository.findUsersByTags(tags.toSet())
+        val users = if(tagIds.isEmpty()){
+            userRepository.findAll()
+        }else{
+            userRepository.findUsersByTags(tags.toSet())
+        }
         return ResponseEntity
             .ok(
                 ApiResponse(
