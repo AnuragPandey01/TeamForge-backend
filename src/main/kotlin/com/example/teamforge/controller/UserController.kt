@@ -125,7 +125,7 @@ class UserController(
             )
     }
 
-    @GetMapping("/tags")
+    @PostMapping("/tags")
     fun getUsersByTags(
         @RequestBody tagIds: List<String>
     ): ResponseEntity<ApiResponse> {

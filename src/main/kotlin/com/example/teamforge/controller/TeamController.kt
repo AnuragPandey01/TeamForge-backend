@@ -11,6 +11,7 @@ import com.example.teamforge.repository.UserRepository
 import com.example.teamforge.repository.UserTeamMappingRepository
 import com.example.teamforge.util.toUuid
 import jakarta.validation.Valid
+import org.springframework.data.jpa.repository.Query
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -76,18 +77,34 @@ class TeamController(
     @PostMapping("accept")
     fun acceptInvitation(
         @RequestHeader("Authorization") token: String,
-        @Valid @RequestBody acceptTeamInviteReq: AcceptTeamInviteRequestDto,
+        @RequestParam(name = "teamId", required = true) teamId: String
     ) {
-        val teamId = acceptTeamInviteReq.teamId.toUuid()
-        val team = teamRepository.findById(teamId).orElseThrow { throw Exception("Team not found") }
+        val team = teamRepository.findById(teamId.toUuid()).orElseThrow { throw Exception("Team not found") }
         val userId = getUserIdFromToken(token,jwtProvider)
         val user = userRepository.findById(userId).orElseThrow { throw Exception("User not found") }
         val userTeamMapping = userTeamMappingRepository.findByUserAndTeam(user, team) ?: throw Exception("User not found")
         userTeamMapping.invitationAccepted = true
+        team.teamSize = team.teamSize?.plus(1)
+        teamRepository.save(team)
         userTeamMappingRepository.save(userTeamMapping)
     }
 
-        @PostMapping("/join")
+    @PostMapping("reject")
+    fun rejectInvitation(
+        @RequestHeader("Authorization") token: String,
+        @RequestParam(name = "teamId", required = true) teamId: String
+    ){
+        val team = teamRepository.findById(teamId.toUuid()).orElseThrow { throw Exception("Team not found") }
+        val userId = getUserIdFromToken(token,jwtProvider)
+        val user = userRepository.findById(userId).orElseThrow { throw Exception("User not found") }
+        val userTeamMapping = userTeamMappingRepository.findByUserAndTeam(user, team) ?: throw Exception("User not found")
+        userTeamMapping.invitationDenied = true
+        teamRepository.save(team)
+        userTeamMappingRepository.save(userTeamMapping)
+    }
+
+
+    @PostMapping("/join")
     fun joinTeam(
         @RequestHeader("Authorization") token: String,
         @Valid @RequestBody joinTeamReq: JoinTeamRequestDto,

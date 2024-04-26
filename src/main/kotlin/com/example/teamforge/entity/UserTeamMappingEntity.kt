@@ -52,7 +52,8 @@ class UserTeamMappingEntity(
                 teamName = team.name!!,
                 isLeader = isLeader,
                 invitationAccepted = invitationAccepted,
-                invitationDenied = invitationDenied
+                invitationDenied = invitationDenied,
+                teamSize = team.teamSize!!
             )
         }
 
@@ -73,4 +74,5 @@ data class UserTeamMappingResponse(
     val isLeader: Boolean,
     val invitationAccepted: Boolean,
     val invitationDenied: Boolean = false,
+    val teamSize: Int
 )
